@@ -11,24 +11,21 @@ from datetime import  datetime
 import numpy as np
 import os
 import pandas as pd
-# from ctypes import cast, POINTER
-# ##################
-# Cam, hCam = 640, 480w
-##################
 
 root=Tk()
 root.title("Smart Attendance")
-root.geometry("600x600")
-Label(root,text="Take attendance with you camera",font=("Calibri 13 bold")).grid(row=0,column=1)
-desc_user=Label(root,text="""Attendance made easy""", font=5)
-desc_user.grid(row=1,column=1)
+root.configure(bg='#E3FDFD')
+root.geometry("500x500")
+top=Label(root,text="Take attendance with your camera",font=("Calibri 13 bold"))
+top.configure(bg='#CBF1F5')
+top.place(relx=0.275,rely=0.025)
+desc_user=Label(root,text="""Attendance made easy :)""", font=5)
+desc_user.configure(bg='#CBF1F5')
+desc_user.place(relx=0.35,rely=0.1)
 # pic_label=Label(image=PhotoImage(file="ngo.png")).grid(row=2,column=0)
 
-
-
 def register():
-    #write the code
-    stuName=input()
+    stuName=input("Enter your name")
     cam = cv2.VideoCapture(0)
 
     cv2.namedWindow("test")
@@ -50,7 +47,7 @@ def register():
             break
         elif k%256 == 32:
             # SPACE pressed
-            pathway = 'student_images'
+            pathway = 'C:\Attendence\student_images'
             img_name = "{}.jpeg".format(stuName)
             cv2.imwrite(os.path.join(pathway , img_name), frame)
             print("{} written!".format(img_name))
@@ -59,6 +56,7 @@ def register():
     cam.release()
 
     cv2.destroyAllWindows()
+
 
 def attendance():
     engine = textSpeach.init()
@@ -78,6 +76,7 @@ def attendance():
         studentImg.append(curimg)
         studentName.append(os.path.splitext(cl)[0])
 
+
     def findEncoding(images) :
         imgEncodings = []
         for img in images :
@@ -95,11 +94,14 @@ def attendance():
                 nameList.append(entry[0])
 
             if name not in nameList:
+                print("true")
                 now = datetime.now()
                 timestr = now.strftime('%H:%M')
-                f.writelines(f'\n{name}, {timestr}')
-                statment = str('welcome to class' + name)
-                engine.say(statment)
+                datestr = now.strftime("%B %d, %Y")
+                f.writelines(f'\n{name}, {timestr}, {datestr}')
+                statement = str('Welcome' + name)
+                print(statement)
+                engine.say(statement)
                 engine.runAndWait()
 
 
@@ -114,13 +116,22 @@ def attendance():
 
         facesInFrame = face_rec.face_locations(Smaller_frames)
         encodeFacesInFrame = face_rec.face_encodings(Smaller_frames, facesInFrame)
-
+        count=0
         for encodeFace, faceloc in zip(encodeFacesInFrame, facesInFrame) :
             matches = face_rec.compare_faces(EncodeList, encodeFace)
             facedis = face_rec.face_distance(EncodeList, encodeFace)
-            print(facedis)
+            #print(facedis)
             matchIndex = np.argmin(facedis)
-
+            #print(matches,matchIndex)
+                #print(check)
+            if False in matches:
+                count=count+1
+            #print(count)
+            if count==0:    
+                cv2.putText(frame,"Unknown", (50,150), cv2.FONT_ITALIC,1,(255,0,255),2)
+            #print(count)
+            #if count==0:
+            #    cv2.putText(frame,"Unknown", (0,0), cv2.FONT_ITALIC,2,(255,0,255),2)
             if matches[matchIndex] :
                 name = studentName[matchIndex].upper()
                 y1, x2, y2, x1 = faceloc
@@ -133,8 +144,8 @@ def attendance():
         cv2.imshow('video',frame)
         cv2.waitKey(1)
 
-def button():
-    #write the code
+
+def stats():
     df=pd.read_csv('D:\Works\Opencv project\Attendance count using face recognition\student ML\stuData.csv').dropna(axis=1)
     def  name():
         name=input('Enter the name of the employee: ')
@@ -146,10 +157,19 @@ def button():
     name()
 
 
-Button(root,text="Register",command=register).grid(row=2,column=2,padx=20,pady=150)
-Button(root,text="Attendance",command=attendance).grid(row=2,column=1,padx=20,pady=150)
-Button(root,text="Button",command=button).grid(row=2,column=0,padx=20,pady=150)
-Button(root,text="Exit",command=root.destroy).grid(row=3,column=0,padx=20,pady=150)
+b1=Button(root,text="Register 👍",command=register,bg='#A6E3E9')
+b1.place(relx=0.13,rely=0.65,width=80,height=30)
+
+b2=Button(root,text="Attendance 😎",command=attendance,bg='#A6E3E9')
+b2.place(relx=0.425,rely=0.65,width=80,height=30)
+
+b3=Button(root,text="Statistics 📈",command=stats,bg='#A6E3E9')
+b3.place(relx=0.725,rely=0.65,width=80,height=30)
+
+
+b4=Button(root,text="Exit 👋",command=root.destroy,bg='#71C9CE')
+b4.place(relx=0.425,rely=0.85,width=75,height=30)
+
 
 
 
